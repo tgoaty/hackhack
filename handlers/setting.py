@@ -2,7 +2,7 @@ from aiogram import Router, types, F
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from create_bot import bitrix
+from aiogram_run import bitrix
 from utils.storage import load_toggle_state, save_toggle_state
 
 setting_router = Router()

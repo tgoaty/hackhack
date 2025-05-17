@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from keyboards import manager_menu
-from create_bot import bitrix, cache_manager
+from aiogram_run import bitrix, cache_manager
 
 manager_router = Router()
 

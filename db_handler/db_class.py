@@ -1,18 +1,16 @@
 import asyncpg
-import os
+
 from logger_config import get_logger
-from dotenv import load_dotenv
 import asyncio
 
-load_dotenv()
 
 logger = get_logger(__name__)
 
 
 class Database:
-    def __init__(self):
+    def __init__(self, PG_LINK):
         self._pool = None
-        self._db_url = os.getenv("PG_LINK")
+        self._db_url = PG_LINK
         self._reconnect_delay = 1
         logger.info("Создан экземпляр Database с URL: %s", self._db_url)
         asyncio.run(self.connect_and_create_table())

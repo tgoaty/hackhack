@@ -1,19 +1,18 @@
-import os
 import aiohttp
 from logger_config import get_logger
-from dotenv import load_dotenv
 from utils.status_normalization import get_normal_status_name
 from utils.storage import load_toggle_state
 
-load_dotenv()
 logger = get_logger(__name__)
 
 
 class BitrixAPI:
-    def __init__(self):
-        self.base_url = os.getenv("BITRIX_TOKEN")
+    def __init__(self, bitrix_token: str):
+        self.base_url = bitrix_token
         if not self.base_url:
-            logger.error("BITRIX_TOKEN не найден в переменных окружения.")
+            logger.error("BITRIX_TOKEN не предоставлен")
+            raise ValueError("BITRIX_TOKEN обязателен для работы BitrixAPI")
+
 
     async def _request(self, method: str, params: dict) -> dict | None:
         """
@@ -67,7 +66,7 @@ class BitrixAPI:
             'filter[COMPANY_ID]': company_id,
             'filter[TYPE_ID]': 'SALE',
             # TODO
-            # 'filter[CATEGORY_ID]': [2, 3],  # Фильтр по воронкам
+            'filter[CATEGORY_ID]': load_toggle_state("order_fields"),
             # TODO
             'select[]': ['TITLE', 'STAGE_ID', 'ID', 'OPPORTUNITY']
 
@@ -78,7 +77,6 @@ class BitrixAPI:
         if self._check_response(result, "result"):
             orders = [
                 {
-                    # TODO
                     "id": order["ID"],
                     "title": order["TITLE"],
                     "status": await get_normal_status_name(order["STAGE_ID"]),
@@ -86,9 +84,7 @@ class BitrixAPI:
                 }
                 for order in result["result"]
             ]
-            # убираем не нужные стадии
-            # TODO
-            orders = [order for order in orders if order["status"] not in ['Собрать информацию для ТКП']]
+
             logger.info(f"Найдено {len(orders)} заказов для компании с ID={company_id}.")
             if len(orders) > 0:
                 return orders
@@ -180,11 +176,8 @@ class BitrixAPI:
             "amount": order.get("OPPORTUNITY", 0),
             "responsible_rp": responsible_rp_name,  # Ответственный РП
             "shipping_date": get_field_value('UF_CRM_1593059797889', None),  # Дата отгрузки по договору
-
             "payment_percent": get_field_value('UF_CRM_1733280946181', "Не указан"),  # Процент оплаты
-
-            "responsible_id": responsible_id,
-
+            "responsible_id": responsible_id
         }
 
         logger.info(f"Получены детали для заказа с ID={order_id}.")
@@ -211,7 +204,7 @@ class BitrixAPI:
         return "Состав сделки не указан."
 
     async def get_folder_id_by_order_id(self, order_id: int, company_title: str,
-                                        parent_id: str = "18818") -> str | None:
+                                        parent_id: str = "96") -> str | None:
         """
         Рекурсивный метод поиска ID папки по ID заказа.
         """

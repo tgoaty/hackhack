@@ -1,6 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
-from create_bot import bitrix, cache_manager
+from aiogram_run import bitrix, cache_manager
 
 public_link_router = Router()
 

@@ -2,7 +2,7 @@ from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.enums import ChatAction
 from keyboards import profile_menu
-from create_bot import bitrix, cache_manager, bot
+from aiogram_run import bitrix, cache_manager, bot
 
 profile_router = Router()
 

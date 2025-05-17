@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.enums import ChatAction
 from aiogram.types import Message
-from create_bot import db, bitrix, bot
+from aiogram_run import db, bitrix, bot
 from keyboards import main_menu, help_menu
 
 auth_router = Router()

@@ -1,9 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import Message
-from os import getenv
-from dotenv import load_dotenv
-
-load_dotenv()
+from aiogram_run import config
 
 help_router = Router()
 
@@ -15,7 +12,7 @@ async def general_manager(message: Message):
     """
 
 
-    username = getenv("HELPER_USERNAME")  # Username работника поддержки
+    username = config.HELPER_USERNAME  # Username работника поддержки
 
     help_message = ""
     await message.answer(
