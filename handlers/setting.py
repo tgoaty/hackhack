@@ -107,9 +107,9 @@ async def cb_handler(callback: CallbackQuery, state: FSMContext):
         current_stage = "notifications"
     elif "Отображать поля:" in msg_text:
         current_stage = "fields"
-    elif "Отображаемые поля в заказе:" in msg_text:
-        current_stage = "order_fields"
     elif "Выбор воронок:" in msg_text:
+        current_stage = "order_fields"
+    elif "Отображаемые поля в заказе:" in msg_text:
         current_stage = "funnels"
     elif "Давать доступ к документам:" in msg_text:
         current_stage = "docs"
@@ -129,7 +129,7 @@ async def cb_handler(callback: CallbackQuery, state: FSMContext):
     elif current_stage == "fields":
         selected = set(fields)
         if data == "next":
-            await callback.message.edit_text("Отображаемые поля в заказе:", reply_markup=await order_fields_keyboard(order_fields, orders_arr=deal_categories))
+            await callback.message.edit_text("Выбор воронок:", reply_markup=await order_fields_keyboard(order_fields, orders_arr=deal_categories))
             await callback.answer()
             return
 
@@ -149,7 +149,7 @@ async def cb_handler(callback: CallbackQuery, state: FSMContext):
     elif current_stage == "order_fields":
         selected = set(order_fields)
         if data == "next":
-            await callback.message.edit_text("Выбор воронок:", reply_markup=await funnels_keyboard(funnels, funnels_arr=deal_fields))
+            await callback.message.edit_text("Отображаемые поля в заказе:", reply_markup=await funnels_keyboard(funnels, funnels_arr=deal_fields))
             await callback.answer()
             return
 

@@ -4,19 +4,20 @@
     ],
     "toggle_fields": [
         "TITLE",
-        "COMPANY_TYPE",
         "ID",
+        "COMPANY_TYPE",
         "LOGO"
+    ],
+    "toggle_docs": [
+        "yes"
     ],
     "toggle_order_fields": [
         "0"
     ],
     "toggle_funnels": [
-        "TITLE",
+        "CATEGORY_ID",
+        "ID",
         "TYPE_ID",
-        "ID"
-    ],
-    "toggle_docs": [
-        "no"
+        "TITLE"
     ]
 }
