@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.types import Message
 from keyboards import auth_menu, edit_menu
-from aiogram_run import config
+from config_global import config
 
 start_router = Router()
 
