@@ -7,6 +7,7 @@ from .public_link import public_link_router
 from .start import start_router
 from .help import help_router
 from .manager import manager_router
+from .setting import setting_router
 
 
 __all__ = [
@@ -17,5 +18,6 @@ __all__ = [
     "public_link_router",
     "start_router",
     "help_router",
-    "manager_router"
+    "manager_router",
+    "setting_router"
 ]

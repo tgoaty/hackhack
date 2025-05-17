@@ -10,17 +10,15 @@ logger = get_logger(__name__)
 
 class BitrixAPI:
     def __init__(self):
-        self.base_url = os.getenv("BITRIX_BASE_URL")
-        self.access_token = os.getenv("BITRIX_ACCESS_TOKEN")
-
-        if not self.base_url or not self.access_token:
-            logger.error("BASE_URL или ACCESS_TOKEN не найдены в переменных окружения.")
+        self.base_url = os.getenv("BITRIX_TOKEN")
+        if not self.base_url:
+            logger.error("BITRIX_TOKEN не найден в переменных окружения.")
 
     async def _request(self, method: str, params: dict) -> dict | None:
         """
         Выполняет запрос к API Bitrix24.
         """
-        url = f"{self.base_url}{self.access_token}/{method}.json"
+        url = f"{self.base_url}/{method}.json"
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get(url, params=params) as response:
@@ -46,7 +44,7 @@ class BitrixAPI:
         params = {
             'type': 'PHONE',
             'values[]': [phone_number],
-                'entity_type': 'COMPANY'
+            'entity_type': 'COMPANY'
         }
         result = await self._request(method, params)
 
@@ -67,8 +65,11 @@ class BitrixAPI:
         params = {
             'filter[COMPANY_ID]': company_id,
             'filter[TYPE_ID]': 'SALE',
+            # TODO
             # 'filter[CATEGORY_ID]': [2, 3],  # Фильтр по воронкам
+            # TODO
             'select[]': ['TITLE', 'STAGE_ID', 'ID', 'OPPORTUNITY']
+
         }
 
         result = await self._request(method, params)
@@ -76,6 +77,7 @@ class BitrixAPI:
         if self._check_response(result, "result"):
             orders = [
                 {
+                    # TODO
                     "id": order["ID"],
                     "title": order["TITLE"],
                     "status": await get_normal_status_name(order["STAGE_ID"]),
@@ -84,6 +86,7 @@ class BitrixAPI:
                 for order in result["result"]
             ]
             # убираем не нужные стадии
+            # TODO
             orders = [order for order in orders if order["status"] not in ['Собрать информацию для ТКП']]
             logger.info(f"Найдено {len(orders)} заказов для компании с ID={company_id}.")
             if len(orders) > 0:
@@ -168,6 +171,7 @@ class BitrixAPI:
             return order.get(field, default)
 
         order_details = {
+            # TODO
             "title": get_field_value('TITLE', 'Не указано'),
             "status": await get_normal_status_name(order.get("STAGE_ID", "")),
             "responsible_name": responsible_name,
@@ -205,7 +209,8 @@ class BitrixAPI:
         logger.info(f"Продукты для заказа с ID={order_id} не найдены.")
         return "Состав сделки не указан."
 
-    async def get_folder_id_by_order_id(self, order_id: int, company_title: str, parent_id: str = "18818") -> str | None:
+    async def get_folder_id_by_order_id(self, order_id: int, company_title: str,
+                                        parent_id: str = "18818") -> str | None:
         """
         Рекурсивный метод поиска ID папки по ID заказа.
         """
@@ -384,10 +389,8 @@ class BitrixAPI:
 
         all_stages = {}
         categories = result["result"].get("categories", [])
-        print(result)
 
         for category in categories:
-            print('c2', category)
             category_id = category.get("id")
             if category_id is None:
                 continue
@@ -410,3 +413,70 @@ class BitrixAPI:
 
         return all_stages if all_stages else None
 
+    async def get_company_fields_as_buttons(self) -> list[tuple[str, str]]:
+        """
+        Получает поля компании и возвращает список кортежей (btn:FIELD_ID, FIELD_TITLE)
+        """
+        method = 'crm.company.fields'
+        result = await self._request(method, {})
+
+        if self._check_response(result, "result"):
+            logger.info("Поля компании успешно получены.")
+            return [(f"btn:{code}", field["title"]) for code, field in result["result"].items()]
+
+        logger.warning("Не удалось получить поля компании.")
+        return []
+
+    async def get_deal_fields_as_buttons(self) -> list[tuple[str, str]]:
+        """
+        Получает поля сделок и возвращает список кортежей (btn:FIELD_ID, FIELD_TITLE)
+        """
+        method = 'crm.deal.fields'
+        result = await self._request(method, {})
+
+        if self._check_response(result, "result"):
+            logger.info("Поля сделок успешно получены.")
+            return [(f"btn:{code}", field["title"]) for code, field in result["result"].items()]
+
+        logger.warning("Не удалось получить поля сделок.")
+        return []
+
+    # async def get_deal_fields_by_category_as_buttons(self, category_id: int) -> list[tuple[str, str]]:
+    #     """
+    #     Получает НЕ readonly поля сделок для указанной категории (воронки)
+    #     и возвращает список кортежей (btn:FIELD_ID, FIELD_TITLE)
+    #     """
+    #     method = 'crm.deal.fields'
+    #     result = await self._request(method, {})
+
+    #     if not self._check_response(result, "result"):
+    #         logger.warning(f"Не удалось получить поля сделок для категории {category_id}")
+    #         return []
+    #
+    #     fields = result["result"]
+
+    #           )
+    #     return [
+    #         (f"btn:{code}", field["title"])
+    #         for code, field in fields.items()
+    #         if not field.get("isReadOnly", False)
+    #     ]
+
+    async def get_deal_categories_as_buttons(self) -> list[tuple[str, str]]:
+        """
+        Получает список воронок (crm.deal.category.list) и возвращает в виде [(id, name), ...].
+        Подходит для отображения в inline-кнопках.
+        """
+        method = 'crm.category.list'
+        result = await self._request(method, {"entityTypeId": 2})
+
+        if self._check_response(result, "result"):
+            categories = result["result"].get("categories", [])
+
+            return [
+                (f"funnel:{cat['id']}", cat["name"])
+                for cat in categories
+            ]
+
+        logger.warning("Не удалось получить список воронок.")
+        return []
