@@ -3,6 +3,7 @@ import aiohttp
 from logger_config import get_logger
 from dotenv import load_dotenv
 from utils.status_normalization import get_normal_status_name
+from utils.storage import load_toggle_state
 
 load_dotenv()
 logger = get_logger(__name__)
@@ -422,7 +423,7 @@ class BitrixAPI:
 
         if self._check_response(result, "result"):
             logger.info("Поля компании успешно получены.")
-            return [(f"btn:{code}", field["title"]) for code, field in result["result"].items()]
+            return [(f"{code}", field["title"]) for code, field in result["result"].items()]
 
         logger.warning("Не удалось получить поля компании.")
         return []
@@ -436,7 +437,7 @@ class BitrixAPI:
 
         if self._check_response(result, "result"):
             logger.info("Поля сделок успешно получены.")
-            return [(f"btn:{code}", field["title"]) for code, field in result["result"].items()]
+            return [(f"{code}", field["title"]) for code, field in result["result"].items()]
 
         logger.warning("Не удалось получить поля сделок.")
         return []
@@ -474,7 +475,7 @@ class BitrixAPI:
             categories = result["result"].get("categories", [])
 
             return [
-                (f"funnel:{cat['id']}", cat["name"])
+                (f"{cat['id']}", cat["name"])
                 for cat in categories
             ]
 

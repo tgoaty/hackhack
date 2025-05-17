@@ -1,0 +1,22 @@
+{
+    "toggle_notifications": [
+        "phone"
+    ],
+    "toggle_fields": [
+        "TITLE",
+        "COMPANY_TYPE",
+        "ID",
+        "LOGO"
+    ],
+    "toggle_order_fields": [
+        "0"
+    ],
+    "toggle_funnels": [
+        "TITLE",
+        "TYPE_ID",
+        "ID"
+    ],
+    "toggle_docs": [
+        "no"
+    ]
+}
